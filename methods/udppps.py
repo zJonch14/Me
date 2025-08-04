@@ -15,7 +15,7 @@ class UDPPPS:
         self.running = True
         end_time = time.time() + self.duration
         threads = []
-        for _ in range(10):  # Increase threads for more packets per second
+        for _ in range(5):  # Increase threads for more packets per second
             t = threading.Thread(target=self.send, daemon=True)
             t.start()
             threads.append(t)
